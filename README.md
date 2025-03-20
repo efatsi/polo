@@ -1,24 +1,18 @@
-# README
+# 3 2 1 Polo!!!
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails app to help coordinate Crozet Bike Polo.
 
-Things you may want to cover:
+## Setup
 
-* Ruby version
+Requirements
+- Ruby @3.5.5
+- Postgres @14
 
-* System dependencies
+```bash
+bundle install
 
-* Configuration
+rails db:create
+rails db:migrate
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+foreman start -f Procfile.dev
+```
