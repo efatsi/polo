@@ -10,6 +10,9 @@ gem "stimulus-rails"
 gem "tailwindcss-rails"
 
 gem "bootsnap", require: false
+gem "twilio-ruby"
+gem "sendgrid-ruby"
+gem "awesome_print"
 
 group :development, :test do
   gem "pry-rails"
