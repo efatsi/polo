@@ -30,7 +30,13 @@ port ENV.fetch("PORT", 3000)
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor (workers + recurring schedule) inside Puma.
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
+# Async mode runs the dispatcher, worker and scheduler as threads in the Puma
+# process instead of forking four extra Rails processes, which OOM'd the 512 MB
+# Fly machine.
+if ENV["SOLID_QUEUE_IN_PUMA"]
+  plugin :solid_queue
+  solid_queue_mode :async
+end
 
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
