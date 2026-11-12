@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   root "games#current"
   resources :games, only: [:index, :show]
 
+  # MCP server for Claude (bearer-token auth; see McpController).
+  match "mcp", to: "mcp#handle", via: [:get, :post, :delete]
+
   namespace :admin do
     root "games#index"
     resources :games, only: [:index, :edit, :update] do
