@@ -18,15 +18,11 @@
 
   <body class="min-h-screen">
     <header class="border-b border-gray-700">
-      <nav class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
+      <nav class="mx-auto flex max-w-2xl items-center px-4 py-4">
         <%= link_to root_path, class: "flex items-center gap-2 font-semibold text-gray-100" do %>
           <%= image_tag "/soccer-ball.png", alt: "", class: "h-6 w-6" %>
           Crozet Bike Polo
         <% end %>
-        <div class="flex gap-5 text-sm">
-          <%= link_to "Next game", root_path, class: current_page?(root_path) ? "text-gray-100" : "hover:text-gray-100" %>
-          <%= link_to "Past games", games_path, class: current_page?(games_path) ? "text-gray-100" : "hover:text-gray-100" %>
-        </div>
       </nav>
     </header>
 

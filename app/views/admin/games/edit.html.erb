@@ -45,7 +45,6 @@
 
   <div class="flex items-center gap-3">
     <%= f.submit "Save", class: "btn-primary cursor-pointer" %>
-    <%= link_to "View public page", game_path(@game), class: "text-sm hover:text-gray-100" if @game.status != "not_a_game" %>
   </div>
 <% end %>
 
@@ -59,4 +58,4 @@
   <% end %>
 </div>
 
-<%= render "games/thread", game: @game %>
+<%= render "thread", game: @game %>

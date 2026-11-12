@@ -1,24 +1,28 @@
-<% content_for :title, "Next game · Crozet Polo" %>
+<% content_for :title, "#{public_status(@game)} · Crozet Bike Polo" %>
 
-<h1 class="mb-4 text-sm font-medium uppercase tracking-wide text-gray-400">Next game</h1>
+<section class="py-10 text-center">
+  <p class="text-sm font-medium uppercase tracking-wide text-gray-400">Next game</p>
+  <h1 class="mt-3 text-5xl font-extrabold tracking-tight sm:text-6xl <%= @game.nil? ? "text-gray-400" : @game.status == "confirmed" ? "text-emerald-300" : "text-amber-300" %>">
+    <%= public_status(@game) %>
+  </h1>
 
-<% if @game %>
-  <%= render "details", game: @game %>
-
-  <% if @later.any? %>
-    <h2 class="mt-8 text-sm font-medium uppercase tracking-wide text-gray-400">Also coming up</h2>
-    <ul class="mt-2 divide-y divide-gray-700">
-      <% @later.each do |game| %>
-        <li class="py-2"><%= link_to "#{game_day(game)} · #{game_time(game)} · #{game.location}", game_path(game), class: "hover:text-gray-100" %></li>
-      <% end %>
-    </ul>
+  <% if @game %>
+    <dl class="mx-auto mt-10 grid max-w-md gap-6 text-left sm:grid-cols-2">
+      <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
+        <dt class="text-sm uppercase tracking-wide text-gray-400">When</dt>
+        <dd class="mt-1 text-xl font-semibold text-gray-50"><%= game_day(@game) %></dd>
+        <dd class="text-lg text-gray-200"><%= game_time(@game) %></dd>
+      </div>
+      <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
+        <dt class="text-sm uppercase tracking-wide text-gray-400">Where</dt>
+        <dd class="mt-1 text-xl font-semibold text-gray-50"><%= location_link(@game.location) %></dd>
+      </div>
+    </dl>
+  <% else %>
+    <p class="mt-4 text-gray-400">Nothing on the calendar yet.</p>
   <% end %>
 
-  <%= render "thread", game: @game %>
-<% else %>
-  <div class="rounded-xl border border-dashed border-gray-600 p-8 text-center">
-    <p class="text-lg text-gray-100">No game on the calendar yet.</p>
-    <p class="mt-1 text-sm text-gray-400">Games get organized on the group's email list. Start a thread to get one going.</p>
-    <%= link_to "Go to the group", "https://groups.io/g/#{Groupsio.group_name}", class: "btn-primary mt-4 inline-block text-sm" %>
-  </div>
-<% end %>
+  <p class="mt-12 text-sm text-gray-400">
+    Games are organized on the <%= link_to "group's email list", "https://groups.io/g/#{Groupsio.group_name}", class: "underline underline-offset-4 hover:text-gray-100" %>.
+  </p>
+</section>
