@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "groupsio": {
-      "command": "node",
-      "args": ["mcp/groupsio/server.js"]
-    }
-  }
-}

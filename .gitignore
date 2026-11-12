@@ -38,5 +38,3 @@
 !/app/assets/builds/.keep
 
 /scratch.*
-
-/mcp/*/node_modules

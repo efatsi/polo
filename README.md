@@ -19,6 +19,7 @@ Claude won't overwrite it until it's unlocked.
 | `ADMIN_PASSWORD` | Password for `/admin`; admin is disabled when unset |
 | `ADMIN_USERNAME` | Optional, defaults to `admin` |
 | `GROUPSIO_GROUP` | Optional, defaults to `crozetbikepolo` |
+| `MCP_TOKEN` | Bearer token for the `/mcp` endpoint; MCP is disabled when unset (`ruby -rsecurerandom -e 'puts SecureRandom.hex(32)'`) |
 
 Locally these go in `.env` (gitignored, loaded by dotenv).
 
@@ -36,9 +37,23 @@ bin/rails groupsio:reextract     # re-run Claude on every thread (GAME_ID=n for 
 ```sh
 fly launch --no-deploy           # keep the existing fly.toml; attach a Postgres database
 fly secrets set RAILS_MASTER_KEY=$(cat config/master.key) \
-  GROUPSIO_API_KEY=... ANTHROPIC_API_KEY=... ADMIN_PASSWORD=...
+  GROUPSIO_API_KEY=... ANTHROPIC_API_KEY=... ADMIN_PASSWORD=... MCP_TOKEN=...
 fly deploy
 fly ssh console -C "bin/rails groupsio:sync TOPICS=50"   # optional backfill
 ```
 
 `fly.toml` runs Solid Queue inside Puma and keeps one machine always on, so the schedule keeps running.
+
+## Asking Claude (MCP)
+
+`/mcp` is an MCP server (Streamable HTTP, bearer-token auth) over the synced data, with the tools
+`next_game`, `get_game`, `list_games`, `search_messages` and `sync_now`. Tool classes are in `app/mcp/`.
+
+Add it to Claude Code at local scope, which keeps the token in `~/.claude.json` and out of the repo:
+
+```sh
+claude mcp add --transport http --scope local crozet-polo http://localhost:3000/mcp \
+  --header "Authorization: Bearer $MCP_TOKEN"
+```
+
+For production, use the app's Fly URL and the `MCP_TOKEN` set in Fly secrets.
