@@ -1,0 +1,30 @@
+<% content_for :title, "Past games · Crozet Polo" %>
+
+<h1 class="mb-4 text-sm font-medium uppercase tracking-wide text-gray-400">Past games</h1>
+
+<% if @games.any? %>
+  <ul class="divide-y divide-gray-700 rounded-xl border border-gray-700">
+    <% @games.each do |game| %>
+      <li>
+        <%= link_to game_path(game), class: "flex items-center justify-between gap-4 px-4 py-3 hover:bg-gray-700/40" do %>
+          <div class="min-w-0">
+            <p class="text-gray-100"><%= game.starts_at.strftime("%a, %b %-d, %Y") %>
+              <span class="text-gray-400">· <%= game_time(game) %> · <%= game.location %></span></p>
+            <p class="truncate text-sm text-gray-400"><%= game.summary %></p>
+          </div>
+          <div class="flex shrink-0 items-center gap-3">
+            <span class="text-sm text-gray-400"><%= pluralize(game.playing.size, "player") %></span>
+            <%= status_badge(game) %>
+          </div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <div class="mt-4 flex justify-between text-sm">
+    <%= link_to("← Newer", games_path(page: @page - 1), class: "hover:text-gray-100") if @page > 1 %>
+    <%= link_to("Older →", games_path(page: @page + 1), class: "ml-auto hover:text-gray-100") if @more %>
+  </div>
+<% else %>
+  <p class="text-gray-400">No past games yet.</p>
+<% end %>

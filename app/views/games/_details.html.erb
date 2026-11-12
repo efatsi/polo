@@ -1,0 +1,32 @@
+<%# Shared game card: date/time/place, status, summary, and who's coming. %>
+<section class="rounded-xl border border-gray-700 bg-gray-900/60 p-5 sm:p-6">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="text-sm uppercase tracking-wide text-gray-400"><%= game_day(game) %></p>
+      <h2 class="mt-1 text-3xl font-bold text-gray-50"><%= game_time(game) %></h2>
+      <p class="mt-1 text-lg"><%= location_link(game.location) %></p>
+    </div>
+    <%= status_badge(game) %>
+  </div>
+
+  <% if game.summary.present? %>
+    <p class="mt-4 text-gray-300"><%= game.summary %></p>
+  <% end %>
+
+  <dl class="mt-5 grid gap-4 sm:grid-cols-3">
+    <% [["In", game.playing, "text-emerald-300"], ["Maybe", game.maybe, "text-amber-300"], ["Out", game.out, "text-gray-400"]].each do |label, people, color| %>
+      <div>
+        <dt class="text-sm font-medium <%= color %>"><%= label %> (<%= people.size %>)</dt>
+        <dd class="mt-1 text-sm">
+          <% if people.any? %>
+            <ul class="space-y-0.5">
+              <% attendee_names(people).each do |name| %><li><%= name %></li><% end %>
+            </ul>
+          <% else %>
+            <span class="text-gray-500">—</span>
+          <% end %>
+        </dd>
+      </div>
+    <% end %>
+  </dl>
+</section>

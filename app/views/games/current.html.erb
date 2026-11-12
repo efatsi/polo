@@ -1,1 +1,24 @@
-Heyy
+<% content_for :title, "Next game · Crozet Polo" %>
+
+<h1 class="mb-4 text-sm font-medium uppercase tracking-wide text-gray-400">Next game</h1>
+
+<% if @game %>
+  <%= render "details", game: @game %>
+
+  <% if @later.any? %>
+    <h2 class="mt-8 text-sm font-medium uppercase tracking-wide text-gray-400">Also coming up</h2>
+    <ul class="mt-2 divide-y divide-gray-700">
+      <% @later.each do |game| %>
+        <li class="py-2"><%= link_to "#{game_day(game)} · #{game_time(game)} · #{game.location}", game_path(game), class: "hover:text-gray-100" %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= render "thread", game: @game %>
+<% else %>
+  <div class="rounded-xl border border-dashed border-gray-600 p-8 text-center">
+    <p class="text-lg text-gray-100">No game on the calendar yet.</p>
+    <p class="mt-1 text-sm text-gray-400">Games get organized on the group's email list. Start a thread to get one going.</p>
+    <%= link_to "Go to the group", "https://groups.io/g/#{Groupsio.group_name}", class: "btn-primary mt-4 inline-block text-sm" %>
+  </div>
+<% end %>

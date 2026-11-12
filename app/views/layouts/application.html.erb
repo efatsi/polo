@@ -16,8 +16,24 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex" data-controller="hello">
+  <body class="min-h-screen">
+    <header class="border-b border-gray-700">
+      <nav class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
+        <%= link_to root_path, class: "flex items-center gap-2 font-semibold text-gray-100" do %>
+          <%= image_tag "/soccer-ball.png", alt: "", class: "h-6 w-6" %>
+          Crozet Bike Polo
+        <% end %>
+        <div class="flex gap-5 text-sm">
+          <%= link_to "Next game", root_path, class: current_page?(root_path) ? "text-gray-100" : "hover:text-gray-100" %>
+          <%= link_to "Past games", games_path, class: current_page?(games_path) ? "text-gray-100" : "hover:text-gray-100" %>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-2xl px-4 py-8">
+      <% flash.each do |type, message| %>
+        <p class="mb-6 rounded-md border px-4 py-2 text-sm <%= type == "alert" ? "border-rose-700 bg-rose-950 text-rose-200" : "border-emerald-700 bg-emerald-950 text-emerald-200" %>"><%= message %></p>
+      <% end %>
       <%= yield %>
     </main>
   </body>

@@ -1,0 +1,5 @@
+<% content_for :title, "#{game_day(@game)} · Crozet Polo" %>
+
+<%= link_to "← Past games", games_path, class: "mb-4 inline-block text-sm hover:text-gray-100" %>
+<%= render "details", game: @game %>
+<%= render "thread", game: @game %>
