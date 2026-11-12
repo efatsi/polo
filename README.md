@@ -1,9 +1,10 @@
 # Crozet Bike Polo
 
-Public site for the group's pickup games: the next game at `/` and past games at `/games`.
+Public site for the group's pickup games. It shows only whether there's a game and, if so, where
+and when: "GAME ON, 6 in", "Pending, 3 in", or "No Game". No names or messages appear publicly.
 
 Games are organized on the [crozetbikepolo groups.io list](https://groups.io/g/crozetbikepolo).
-Every 15 minutes `SyncGroupsioJob` pulls recent threads from the groups.io API into Postgres.
+Every hour `SyncGroupsioJob` pulls recent threads from the groups.io API into Postgres.
 When a thread has new messages, Claude (`GameExtractor`) reads it and fills in the date, time,
 location (default Crozet Park, backup Beaver Creek Reservoir), status, and who's in or out.
 
@@ -27,7 +28,7 @@ Locally these go in `.env` (gitignored, loaded by dotenv).
 
 ```sh
 bin/setup
-bin/dev                          # web + tailwind + jobs (runs the 15-minute sync)
+bin/dev                          # web + tailwind + jobs (runs the hourly sync)
 bin/rails groupsio:sync          # sync now (TOPICS=50 to go further back, EXTRACT=false to skip Claude)
 bin/rails groupsio:reextract     # re-run Claude on every thread (GAME_ID=n for one)
 ```
@@ -35,10 +36,13 @@ bin/rails groupsio:reextract     # re-run Claude on every thread (GAME_ID=n for 
 ## Deploying to Fly
 
 ```sh
-fly launch --no-deploy           # keep the existing fly.toml; attach a Postgres database
+# First time only (already done for crozet-bike-polo):
+fly apps create crozet-bike-polo
+fly postgres create --name crozet-bike-polo-db --region iad --initial-cluster-size 1 --vm-size shared-cpu-1x --volume-size 1
+fly postgres attach crozet-bike-polo-db --app crozet-bike-polo --database-name polo_production
 fly secrets set RAILS_MASTER_KEY=$(cat config/master.key) \
   GROUPSIO_API_KEY=... ANTHROPIC_API_KEY=... ADMIN_PASSWORD=... MCP_TOKEN=...
-fly deploy
+fly deploy --ha=false
 fly ssh console -C "bin/rails groupsio:sync TOPICS=50"   # optional backfill
 ```
 

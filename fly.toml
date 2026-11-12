@@ -1,12 +1,12 @@
-# Fly.io config. Create the app + database with `fly launch --no-deploy` (keep this file),
-# then set secrets — see README.md "Deploying to Fly".
-app = "crozet-polo"
+# Fly.io config for https://crozet-bike-polo.fly.dev
+# Postgres: unmanaged Fly Postgres app "crozet-bike-polo-db", attached (sets DATABASE_URL).
+app = "crozet-bike-polo"
 primary_region = "iad"
 
 [build]
 
 [env]
-  # Run Solid Queue (background jobs + the 15-minute groups.io sync) inside Puma.
+  # Run Solid Queue (background jobs + the hourly groups.io sync) inside Puma.
   SOLID_QUEUE_IN_PUMA = "true"
   RAILS_LOG_TO_STDOUT = "true"
 
