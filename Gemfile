@@ -18,3 +18,9 @@ group :development, :test do
   gem "pry-rails"
   gem "foreman"
 end
+
+gem "anthropic", "~> 2.8"
+
+gem "solid_queue", "~> 1.7"
+
+gem "dotenv", "~> 3.2", :groups => [:development, :test]

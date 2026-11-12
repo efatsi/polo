@@ -33,10 +33,13 @@ module Polo
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "Eastern Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Background jobs + recurring schedule (config/recurring.yml) run on Solid Queue.
+    config.active_job.queue_adapter = :solid_queue
   end
 end

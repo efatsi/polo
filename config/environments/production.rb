@@ -71,7 +71,7 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter = :resque
+  # Solid Queue tables live in the primary database (see CreateSolidQueueTables).
   # config.active_job.queue_name_prefix = "polo_production"
 
   # Disable caching for Action Mailer templates even if Action Controller
