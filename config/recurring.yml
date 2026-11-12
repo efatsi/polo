@@ -1,7 +1,7 @@
 default: &default
   sync_groupsio:
     class: SyncGroupsioJob
-    schedule: every hour
+    schedule: every 15 minutes
 
 development:
   <<: *default

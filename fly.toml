@@ -6,7 +6,7 @@ primary_region = "iad"
 [build]
 
 [env]
-  # Run Solid Queue (background jobs + the hourly groups.io sync) inside Puma.
+  # Run Solid Queue (background jobs + the 15-minute groups.io sync) inside Puma.
   SOLID_QUEUE_IN_PUMA = "true"
   RAILS_LOG_TO_STDOUT = "true"
 
