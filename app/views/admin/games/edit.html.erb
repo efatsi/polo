@@ -1,0 +1,62 @@
+<% content_for :title, "Edit · #{@game.subject}" %>
+
+<%= link_to "← All threads", admin_games_path, class: "mb-4 inline-block text-sm hover:text-gray-100" %>
+<h1 class="text-xl font-semibold text-gray-100"><%= @game.subject %></h1>
+<p class="mt-1 text-sm text-gray-400">
+  Claude last read this <%= @game.extracted_at ? "#{time_ago_in_words(@game.extracted_at)} ago" : "never" %>.
+  Changing a field locks it so Claude won't overwrite it; tick "unlock" to hand it back.
+</p>
+
+<%= form_with model: @game, url: admin_game_path(@game), method: :patch, class: "mt-6 space-y-5" do |f| %>
+  <% input = "w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-gray-100" %>
+
+  <div>
+    <%= render "field_label", game: @game, field: "starts_at", label: "Date & time" %>
+    <%= f.datetime_local_field :starts_at, value: @game.starts_at&.strftime("%Y-%m-%dT%H:%M"), class: input %>
+    <label class="mt-1 flex items-center gap-2 text-sm"><%= f.check_box :time_tbd %> Time not settled yet</label>
+  </div>
+
+  <div>
+    <%= render "field_label", game: @game, field: "location", label: "Location" %>
+    <%= f.text_field :location, list: "locations", class: input %>
+    <datalist id="locations">
+      <option value="<%= Game::DEFAULT_LOCATION %>"></option>
+      <option value="<%= Game::BACKUP_LOCATION %>"></option>
+    </datalist>
+  </div>
+
+  <div>
+    <%= render "field_label", game: @game, field: "status", label: "Status" %>
+    <%= f.select :status, Game::STATUSES.map { [_1.humanize, _1] }, {}, class: input %>
+  </div>
+
+  <div>
+    <%= render "field_label", game: @game, field: "summary", label: "Summary" %>
+    <%= f.text_area :summary, rows: 2, class: input %>
+  </div>
+
+  <div>
+    <%= render "field_label", game: @game, field: "attendances", label: "Who's coming" %>
+    <%= text_area_tag "game[attendances_text]",
+          @game.attendances.map { [_1.name, _1.status, _1.note].compact.join(" | ") }.join("\n"),
+          rows: [@game.attendances.size + 1, 4].max, class: "#{input} font-mono text-sm" %>
+    <p class="mt-1 text-xs text-gray-500">One per line: <code>Name | in/maybe/out | optional note</code></p>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit "Save", class: "btn-primary cursor-pointer" %>
+    <%= link_to "View public page", game_path(@game), class: "text-sm hover:text-gray-100" if @game.status != "not_a_game" %>
+  </div>
+<% end %>
+
+<div class="mt-6 border-t border-gray-700 pt-4">
+  <%= button_to "Re-run Claude on this thread", extract_admin_game_path(@game), class: "btn-opaque text-sm hover:text-gray-900" %>
+  <% if @game.ai_data.present? %>
+    <details class="mt-3 text-xs">
+      <summary class="cursor-pointer text-gray-400">What Claude extracted</summary>
+      <pre class="mt-2 overflow-x-auto rounded bg-gray-900 p-3"><%= JSON.pretty_generate(@game.ai_data) %></pre>
+    </details>
+  <% end %>
+</div>
+
+<%= render "games/thread", game: @game %>

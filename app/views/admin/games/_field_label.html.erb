@@ -1,0 +1,6 @@
+<div class="mb-1 flex items-center justify-between text-sm">
+  <span class="font-medium text-gray-200"><%= label %></span>
+  <% if game.locked?(field) %>
+    <label class="flex items-center gap-1 text-xs text-amber-300">🔒 locked · <%= check_box_tag "unlock[]", field, false, id: "unlock_#{field}" %> unlock</label>
+  <% end %>
+</div>

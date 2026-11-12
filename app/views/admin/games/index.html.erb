@@ -1,0 +1,23 @@
+<% content_for :title, "Admin · Crozet Polo" %>
+
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-sm font-medium uppercase tracking-wide text-gray-400">Admin · Threads</h1>
+  <%= button_to "Sync from groups.io now", sync_admin_games_path, class: "btn-primary text-sm" %>
+</div>
+
+<table class="w-full text-sm">
+  <thead class="text-left text-gray-400">
+    <tr><th class="py-2">Thread</th><th>Game</th><th>Status</th><th>Locked</th></tr>
+  </thead>
+  <tbody class="divide-y divide-gray-700">
+    <% @games.each do |game| %>
+      <tr>
+        <td class="py-2 pr-3"><%= link_to game.subject, edit_admin_game_path(game), class: "text-gray-100 hover:underline" %>
+          <div class="text-xs text-gray-500"><%= game.messages.size %> msgs · last <%= game.last_post_at&.strftime("%b %-d") %></div></td>
+        <td class="pr-3"><%= game_day(game) %>, <%= game_time(game) %><div class="text-xs text-gray-500"><%= game.location %></div></td>
+        <td class="pr-3"><%= status_badge(game) %></td>
+        <td class="text-xs text-gray-400"><%= game.locked_fields.join(", ").presence || "—" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
