@@ -1,0 +1,84 @@
+<% content_for :title, "Connect an agent · Crozet Polo" %>
+<% pre = "mt-2 overflow-x-auto whitespace-pre rounded-md border border-gray-700 bg-gray-900 p-3 font-mono text-xs text-gray-100" %>
+<% h2 = "text-lg font-semibold text-gray-100" %>
+
+<%= link_to "← Admin", admin_root_path, class: "mb-4 inline-block text-sm hover:text-gray-100" %>
+<h1 class="text-xl font-semibold text-gray-100">Connect Claude (or another agent)</h1>
+<p class="mt-2 text-sm text-gray-400">
+  This URL is an MCP server over the synced game threads, so an agent can answer things like
+  “who’s in for Sunday?” It speaks Streamable HTTP and authenticates with a bearer token.
+</p>
+
+<% if @token.blank? %>
+  <p class="mt-6 rounded-md border border-rose-700 bg-rose-950 px-4 py-2 text-sm text-rose-200">
+    <code>MCP_TOKEN</code> isn’t set, so the MCP server is disabled. Set it with
+    <code>fly secrets set MCP_TOKEN=$(ruby -rsecurerandom -e 'puts SecureRandom.hex(32)')</code>.
+  </p>
+<% else %>
+  <dl class="mt-6 space-y-3 text-sm">
+    <div><dt class="text-gray-400">Server URL</dt><dd><code class="text-gray-100"><%= @url %></code></dd></div>
+    <div><dt class="text-gray-400">Header</dt><dd><code class="break-all text-gray-100">Authorization: Bearer <%= @token %></code></dd></div>
+  </dl>
+  <p class="mt-2 text-xs text-gray-500">Treat the token like a password: anyone with it can read the group’s messages.</p>
+
+  <section class="mt-8">
+    <h2 class="<%= h2 %>">Claude Code</h2>
+    <p class="mt-1 text-sm text-gray-400">Run in a terminal. <code>--scope user</code> makes it available in every project.</p>
+    <pre class="<%= pre %>">claude mcp add --transport http --scope user crozet-polo <%= @url %> \
+  --header "Authorization: Bearer <%= @token %>"</pre>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="<%= h2 %>">Claude Desktop</h2>
+    <p class="mt-1 text-sm text-gray-400">
+      Settings → Developer → Edit Config, add this to <code>claude_desktop_config.json</code>, then restart Claude.
+      It uses <code>mcp-remote</code> (needs Node.js) to bridge to the HTTP server.
+    </p>
+    <pre class="<%= pre %>"><%= JSON.pretty_generate(
+      "mcpServers" => {
+        "crozet-polo" => {
+          "command" => "npx",
+          "args" => ["-y", "mcp-remote", @url, "--header", "Authorization:${AUTH_HEADER}"],
+          "env" => { "AUTH_HEADER" => "Bearer #{@token}" },
+        },
+      },
+    ) %></pre>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="<%= h2 %>">Other agents</h2>
+    <p class="mt-1 text-sm text-gray-400">
+      Any MCP client that supports Streamable HTTP with custom headers works: point it at the server URL
+      and send the <code>Authorization</code> header above. Most use a JSON config like:
+    </p>
+    <pre class="<%= pre %>"><%= JSON.pretty_generate(
+      "mcpServers" => {
+        "crozet-polo" => {
+          "type" => "http",
+          "url" => @url,
+          "headers" => { "Authorization" => "Bearer #{@token}" },
+        },
+      },
+    ) %></pre>
+    <p class="mt-2 text-xs text-gray-500">
+      Claude.ai custom connectors (web/mobile) only support OAuth or no auth, so they can’t use this token.
+    </p>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="<%= h2 %>">Check it works</h2>
+    <pre class="<%= pre %>">curl -s <%= @url %> \
+  -H "Authorization: Bearer <%= @token %>" \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</pre>
+  </section>
+<% end %>
+
+<section class="mt-8">
+  <h2 class="<%= h2 %>">Tools</h2>
+  <dl class="mt-2 space-y-3 text-sm">
+    <% @tools.each do |name, description| %>
+      <div><dt class="font-mono text-gray-100"><%= name %></dt><dd class="text-gray-400"><%= description %></dd></div>
+    <% end %>
+  </dl>
+</section>

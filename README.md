@@ -60,4 +60,5 @@ claude mcp add --transport http --scope local crozet-polo http://localhost:3000/
   --header "Authorization: Bearer $MCP_TOKEN"
 ```
 
-For production, use the app's Fly URL and the `MCP_TOKEN` set in Fly secrets.
+For production, use the app's Fly URL and the `MCP_TOKEN` set in Fly secrets. Opening `/mcp` in a
+browser (admin basic auth) shows ready-to-paste setup for Claude Code, Claude Desktop and other agents.
