@@ -19,7 +19,7 @@
       </div>
       <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
         <dt class="text-sm uppercase tracking-wide text-gray-400">Who</dt>
-        <dd class="mt-1 text-xl font-semibold text-gray-50"><%= @game.playing.size %> in</dd>
+        <dd class="mt-1 text-xl font-semibold text-gray-50"><%= pluralize(@game.playing.size, "polohead") %></dd>
       </div>
     </dl>
   <% else %>
