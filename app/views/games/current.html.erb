@@ -7,7 +7,7 @@
   </h1>
 
   <% if @game %>
-    <dl class="mx-auto mt-10 grid max-w-md gap-6 text-left sm:grid-cols-2">
+    <dl class="mx-auto mt-10 grid max-w-3xl gap-6 text-left sm:grid-cols-3">
       <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
         <dt class="text-sm uppercase tracking-wide text-gray-400">When</dt>
         <dd class="mt-1 text-xl font-semibold text-gray-50"><%= game_day(@game) %></dd>
@@ -16,6 +16,10 @@
       <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
         <dt class="text-sm uppercase tracking-wide text-gray-400">Where</dt>
         <dd class="mt-1 text-xl font-semibold text-gray-50"><%= location_link(@game.location) %></dd>
+      </div>
+      <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-5">
+        <dt class="text-sm uppercase tracking-wide text-gray-400">Who</dt>
+        <dd class="mt-1 text-xl font-semibold text-gray-50"><%= @game.playing.size %> in</dd>
       </div>
     </dl>
   <% else %>

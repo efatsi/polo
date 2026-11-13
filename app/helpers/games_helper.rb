@@ -1,10 +1,12 @@
 module GamesHelper
-  # Public headline: "GAME ON, 6 in" / "Pending, 3 in" / "No Game".
+  LIKELY_THRESHOLD = 4
+
+  # Public headline: "GAME ON" / "Likely" (4+ in) / "Pending" / "No Game".
   def public_status(game)
     return "No Game" if game.nil?
+    return "GAME ON" if game.status == "confirmed"
 
-    label = game.status == "confirmed" ? "GAME ON" : "Pending"
-    "#{label}, #{game.playing.size} in"
+    game.playing.size >= LIKELY_THRESHOLD ? "Likely" : "Pending"
   end
 
   STATUS_BADGES = {
