@@ -3,7 +3,8 @@
 class GameExtractor
   class Error < StandardError; end
 
-  MODEL = "claude-opus-5-5".freeze
+  # Haiku matched Opus on status/date/location across 20 real threads at ~4% of the cost.
+  MODEL = "claude-haiku-5-5".freeze
 
   SYSTEM_PROMPT = <<~PROMPT.freeze
     You read email threads from the Crozet, Virginia bike polo group's mailing list and
@@ -12,27 +13,35 @@ class GameExtractor
     How the group works:
     - Someone starts a thread a few days ahead proposing a day and time ("Sunday polo?").
       Others reply with whether they're in, out, or what times work for them.
-    - The default location is #{Game::DEFAULT_LOCATION}. The backup is #{Game::BACKUP_LOCATION}
+    - The default location is #{Game::DEFAULT_LOCATION}. "Festival Field" is the field at
+      #{Game::DEFAULT_LOCATION} and means the same place. The backup is #{Game::BACKUP_LOCATION}
       (sometimes "BCR" or "the reservoir"), used when the park is unavailable — wet or
-      closed fields, an event at the park, or someone proposes moving there. Use
-      #{Game::DEFAULT_LOCATION} unless the thread points to a different place.
+      closed fields, an event at the park, or someone proposes moving there.
+    - location: exactly "#{Game::DEFAULT_LOCATION}" or "#{Game::BACKUP_LOCATION}", with nothing
+      added. Use #{Game::DEFAULT_LOCATION} unless the thread points to the reservoir. Only if
+      the thread clearly moves the game somewhere else entirely, give that place's name.
     - All times are US Eastern (America/New_York).
 
     Rules:
     - Resolve relative days ("Sunday", "tomorrow", "this weekend") against the date of the
       message that says them. Each message is labeled with its sent date and weekday.
-    - date / start_time: the game being organized. If the thread settled on a time, use it.
+    - weekday / date / start_time: the game being organized. weekday is the day name
+      ("Sunday"), or "unknown" if no day can be worked out; date must fall on that weekday. If the thread settled on a time, use it.
       If not settled, use the time with the most support so far, or the time proposed by
       the thread starter. Use null for start_time if no time has been mentioned, and null for
       date if no day can be worked out.
-    - status: "confirmed" if the thread agrees the game is on (e.g. "see you at noon", "it's
-      on", or a clear consensus with enough players); "cancelled" if it was called off;
+    - status: "confirmed" if the thread agrees the game is on: an explicit "see you at noon" or
+      "it's on", or four or more people "in" for the same day and time with nobody calling it off
+      (people sorting out who brings what counts as on). "cancelled" if it was called off;
       "proposed" otherwise. Use "not_a_game" for threads that aren't organizing a specific
       game (announcements, gear, general discussion).
     - attendees: one entry per person, using the name shown on their messages (or as
-      mentioned, for people named by others). "in" = plans to play, "maybe" = unsure or
-      conditional, "out" = not playing. The person proposing a game counts as "in" unless they
-      say otherwise. note: a short constraint or detail in their words, like "hard stop at 2"
+      mentioned, for people named by others). Include people someone else says are coming
+      ("Hazel and I will be there" makes Hazel "in" too). "in" = plans to play, including
+      hedged yeses like "I think I can make it" or "might be a bit late"; "maybe" = genuinely
+      undecided or conditional ("depends on the weather", "50/50"); "out" = not playing.
+      Someone who offered several days counts as "in" once the game lands on one of them.
+      The person proposing a game counts as "in" unless they say otherwise. note: a short constraint or detail in their words, like "hard stop at 2"
       or "can bring extra mallets"; empty string if none. Later messages override earlier ones.
     - summary: one or two plain sentences for the website, e.g. "Noon at Crozet Park; Bruno
       and Tyler have a hard stop at 2."
@@ -41,9 +50,10 @@ class GameExtractor
   SCHEMA = {
     type: "object",
     additionalProperties: false,
-    required: %w[status date start_time location summary attendees],
+    required: %w[status weekday date start_time location summary attendees],
     properties: {
       status: { type: "string", enum: %w[proposed confirmed cancelled not_a_game] },
+      weekday: { type: "string", enum: [*Date::DAYNAMES, "unknown"], description: "Day of the week the game is on" },
       date: { type: %w[string null], description: "YYYY-MM-DD" },
       start_time: { type: %w[string null], description: "24-hour HH:MM" },
       location: { type: "string" },
@@ -83,15 +93,14 @@ class GameExtractor
   private
 
   def extract(messages)
-    response = @client.beta.messages.create(
+    # Haiku has no server-side refusal fallback; a refusal raises below and the
+    # thread is retried on the next sync.
+    response = @client.messages.create(
       model: MODEL,
       max_tokens: 16_000,
       system_: SYSTEM_PROMPT,
       messages: [{ role: "user", content: transcript(messages) }],
-      output_config: { effort: :medium, format_: { type: :json_schema, schema: SCHEMA } },
-      # Retry on a substitute model if the request is declined for policy reasons.
-      fallbacks: :default,
-      betas: ["server-side-fallback-2026-07-01"]
+      output_config: { effort: :medium, format_: { type: :json_schema, schema: SCHEMA } }
     )
 
     if response.stop_reason == :refusal
@@ -120,7 +129,7 @@ class GameExtractor
       attrs = { ai_data: data, extracted_at: Time.current, extracted_through_msg_num: through_msg_num }
 
       unless @game.locked?(:starts_at)
-        attrs[:starts_at] = parse_start(data["date"], data["start_time"])
+        attrs[:starts_at] = parse_start(self.class.resolve_date(data["date"], data["weekday"]), data["start_time"])
         attrs[:time_tbd] = data["date"].present? && data["start_time"].blank?
       end
       attrs[:status] = data["status"] unless @game.locked?(:status)
@@ -135,6 +144,20 @@ class GameExtractor
         end
       end
     end
+  end
+
+  # Models occasionally get the date off by a day or two while naming the weekday
+  # correctly ("Sunday" -> a Saturday's date). Snap the date to the nearest day
+  # (within 3) that falls on the stated weekday.
+  def self.resolve_date(date, weekday)
+    return date if date.blank? || !Date::DAYNAMES.include?(weekday)
+
+    d = Date.iso8601(date)
+    return date if d.strftime("%A") == weekday
+
+    (-3..3).map { d + _1 }.find { _1.strftime("%A") == weekday }&.iso8601 || date
+  rescue Date::Error
+    date
   end
 
   # Untimed games sort as noon on their day.
