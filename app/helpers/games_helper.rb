@@ -19,7 +19,7 @@ module GamesHelper
   # Admin-only badge for a thread's extracted status.
   def status_badge(game)
     label, classes = STATUS_BADGES.fetch(game.status)
-    tag.span(label, class: "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset #{classes}")
+    tag.span(label, class: "inline-flex items-center justify-center text-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset #{classes}")
   end
 
   def game_day(game)
