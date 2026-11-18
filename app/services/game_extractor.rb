@@ -38,8 +38,12 @@ class GameExtractor
     - attendees: one entry per person, using the name shown on their messages (or as
       mentioned, for people named by others). Include people someone else says are coming
       ("Hazel and I will be there" makes Hazel "in" too). "in" = plans to play, including
-      hedged yeses like "I think I can make it" or "might be a bit late"; "maybe" = genuinely
-      undecided or conditional ("depends on the weather", "50/50"); "out" = not playing.
+      hedged yeses like "I think I can make it", "probably good", "should be able to",
+      "might be a bit late", or "I'll confirm that morning". A reply to "who's in?" that just
+      says the proposed day or time works for them is "in": "Thursday works", "both are ok",
+      "Thursday looks better for me" (when the game is Thursday). "maybe" is only for genuinely
+      undecided or conditional replies with no lean toward yes ("depends on the weather",
+      "50/50", "not sure yet"). Leaning yes is "in", not "maybe". "out" = not playing.
       Someone who offered several days counts as "in" once the game lands on one of them.
       The person proposing a game counts as "in" unless they say otherwise. note: a short constraint or detail in their words, like "hard stop at 2"
       or "can bring extra mallets"; empty string if none. Later messages override earlier ones.
